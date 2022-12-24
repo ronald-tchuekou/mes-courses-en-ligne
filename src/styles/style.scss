@@ -16,3 +16,19 @@ body, #root {
 .active {
   @apply bg-indigo-400 text-white
 }
+
+table {
+  thead{
+    @apply bg-gray-100
+  }
+  th{
+    @apply py-2
+  }
+  tbody{
+    tr{
+      td{
+        @apply py-3
+      }
+    }
+  }
+}

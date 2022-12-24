@@ -1,13 +1,12 @@
 import React from 'react'
 import {CategoryModel} from "../models";
+import {motion} from "framer-motion"
+import {Link, useParams} from "react-router-dom";
 
 interface SideBarProps {
-   onCategoryChange: any
 }
 
-export const SideBar = (props: SideBarProps) => {
-   const {onCategoryChange} = props
-   
+export const SideBar = (_props: SideBarProps) => {
    const CATEGORIES: CategoryModel[] = [
       {name: 'Légumes', id: 'legumes'},
       {name: 'Fruits', id: 'fruits'},
@@ -21,20 +20,18 @@ export const SideBar = (props: SideBarProps) => {
    ]
    
    const [current, setCurrent] = React.useState<string>('')
+   const params = useParams()
    
    React.useEffect(() => {
-      const slugs = window.location.pathname.split('/')
-      const value = slugs.length > 1 ? slugs[1] : ''
+      const value = params['category_id'] ? params['category_id'] : ''
       setCurrent(value)
-      onCategoryChange(value)
-   }, [onCategoryChange])
+   }, [params])
    
    return (
       <aside className={"flex-none p-5 w-[250px] bg-gray-200 h-full flex flex-col gap-2"}>
          {CATEGORIES.map(item => (
             <SideBarItem
                active={current === item.id}
-               onClick={setCurrent}
                item={item}
                key={item.id}/>
          ))}
@@ -45,22 +42,20 @@ export const SideBar = (props: SideBarProps) => {
 interface SideBarItemProps {
    item: CategoryModel,
    active?: boolean,
-   onClick?: any
 }
 
 const SideBarItem = (props: SideBarItemProps) => {
-   
-   const handleClick = React.useCallback(() => {
-      props.onClick(props.item.id)
-   }, [props])
-   
    return (
-      <a
-         onClick={handleClick}
-         href={`/${props.item.id}`}
-         className={"transition-all duration-300 rounded px-3 py-1 text-base text-gray-400 hover:text-white" +
-            ` hover:bg-indigo-400 ${props.active ? 'active' : ''}`}>
-         {props.item.name}
-      </a>
+      <motion.div
+         whileHover={{scale: 1.1}}
+         whileTap={{scale: 0.9}}
+         transition={{type: 'spring', stiffness: 300, damping: 10}}>
+         <Link
+            to={`${props.item.id}`}
+            className={"transition-all duration-300 rounded px-3 py-1 text-base text-gray-400 hover:text-white" +
+               ` hover:bg-indigo-400 ${props.active ? 'active' : ''} block w-full`}>
+            {props.item.name}
+         </Link>
+      </motion.div>
    )
 }
