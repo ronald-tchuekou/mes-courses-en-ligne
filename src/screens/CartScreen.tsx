@@ -1,34 +1,38 @@
 import React from "react";
 import {CartItemModel} from "../models";
 import {motion} from "framer-motion";
-import {CounterInput} from "../components";
+import {CounterInput, EmptyContent} from "../components";
 import {TrashIcon} from "@heroicons/react/24/outline";
+import {useAppDispatch, useAppSelector} from "../app/hooks";
+import {removeFromCart, updateCartItem} from "../features/cart.slice";
+import {useNavigate} from "react-router-dom";
 
 interface CartScreenProps {
-   cart: CartItemModel[]
-   setCart: any
 }
 
-export const CartScreen = (props: CartScreenProps) => {
-   const {cart, setCart} = props
+export const CartScreen = (_props: CartScreenProps) => {
+   
+   const cart = useAppSelector((state) => state.cartReducer.cart)
+   const dispatch = useAppDispatch()
+   const navigate = useNavigate()
    
    const handleQuantityChange = React.useCallback((value: number, index: number) => {
-      setCart((state: CartItemModel[]) => [
-         ...state.slice(0, index),
-         {
-            product: state[index].product,
+      dispatch(updateCartItem({
+         index,
+         item: {
+            product: cart[index].product,
             quantity: value
-         },
-         ...state.slice(index + 1)
-      ])
-   }, [setCart])
+         }
+      }))
+   }, [cart, dispatch])
    
    const removeCartItem = React.useCallback((index: number) => {
-      setCart((state: CartItemModel[]) => [
-         ...state.slice(0, index),
-         ...state.slice(index + 1)
-      ])
-   }, [setCart])
+      dispatch(removeFromCart(index))
+   }, [dispatch])
+   
+   const checkout = React.useCallback(() => {
+      navigate("/checkout")
+   }, [navigate])
    
    return (
       <main
@@ -36,20 +40,22 @@ export const CartScreen = (props: CartScreenProps) => {
          style={{height: 'calc(100vh - 73px)'}}>
          <div className={"h-full overflow-y-auto"}>
             <h1 className={"text-lg sm:text-xl text-gray-600 p-4"}>Mon panier</h1>
-            <div className={"flex flex-row w-full px-4 pb-4 gap-4"}>
+            <div className={"flex flex-col md:flex-row w-full px-4 pb-4 gap-4"}>
                <div className={"w-full"}>
                   <table className={"table w-full table-auto"}>
                      <thead>
-                     <th>Produit</th>
-                     <th>Nom</th>
-                     <th>Prix</th>
-                     <th>Quantité</th>
-                     <th>Total</th>
-                     <th className={"w-12"}></th>
+                     <tr>
+                        <th>Produit</th>
+                        <th>Nom</th>
+                        <th>Prix</th>
+                        <th>Quantité</th>
+                        <th>Total</th>
+                        <th className={"w-12"}></th>
+                     </tr>
                      </thead>
                      <tbody>
                      {cart.map((item, i) => (
-                        <tr className={"border-b"}>
+                        <tr key={i} className={"border-b"}>
                            <td>
                               <img
                                  className={"aspect-square w-[70px] sm:w-[100px] border rounded-md"}
@@ -79,8 +85,11 @@ export const CartScreen = (props: CartScreenProps) => {
                      ))}
                      </tbody>
                   </table>
+                  {cart.length === 0 && (
+                     <EmptyContent text={"Aucun produit présent dans votre panier"}/>
+                  )}
                </div>
-               <Coupon cart={cart}/>
+               <Coupon checkout={checkout} cart={cart}/>
             </div>
          </div>
       </main>
@@ -89,10 +98,11 @@ export const CartScreen = (props: CartScreenProps) => {
 
 interface CouponProps {
    cart: CartItemModel[]
+   checkout: any
 }
 
 const Coupon = (props: CouponProps) => {
-   const {cart} = props
+   const {cart, checkout} = props
    
    const amount = React.useMemo(() => {
       let result = 0
@@ -102,9 +112,9 @@ const Coupon = (props: CouponProps) => {
       return result
    }, [cart])
    
-   const checkout = React.useCallback(() => {
-      //TODO
-   }, [])
+   const handleCheckout = React.useCallback(() => {
+      checkout()
+   }, [checkout])
    
    return (
       <div className={"w-full lg:w-[500px]"}>
@@ -116,11 +126,15 @@ const Coupon = (props: CouponProps) => {
                <div className={"flex flex-col gap-2 px-5 py-3"}>
                   <div className={"flex flex-row text-gray-400 text-base justify-between"}>
                      <div>Sous-Total :</div>
-                     <div className={"text-gray-900 font-semibold"}>{amount} XFA</div>
+                     <div className={"text-gray-900 font-semibold"}>
+                        {amount} XFA
+                     </div>
                   </div>
                   <div className={"flex flex-row text-gray-400 text-base justify-between"}>
                      <div>Frais livraison :</div>
-                     <div className={"text-gray-900 font-semibold"}>1000 XFA</div>
+                     <div className={"text-gray-900 font-semibold"}>
+                        {amount === 0 ? 0 : 1000} XFA
+                     </div>
                   </div>
                   <button className={"text-yellow-500 text-base font-medium text-left"}>
                      {"Ajouter un code coupon >>"}
@@ -129,17 +143,21 @@ const Coupon = (props: CouponProps) => {
                <div className={"flex flex-col gap-2 px-5 py-3"}>
                   <div className={"flex flex-row text-gray-400 text-base justify-between"}>
                      <div>Total à payer :</div>
-                     <div className={"text-gray-900 font-semibold"}>{amount + 1000} XFA</div>
+                     <div className={"text-gray-900 font-semibold"}>
+                        {amount === 0 ? 0 : amount + 1000} XFA
+                     </div>
                   </div>
                </div>
             </div>
             <div className={"w-full p-5"}>
                <motion.button
+                  disabled={cart.length === 0}
                   whileHover={{scale: 1.1}}
                   whileTap={{scale: 0.9}}
                   transition={{type: 'spring', stiffness: 400, damping: 10}}
-                  onClick={checkout}
-                  className={"shadow-lg rounded-md bg-indigo-500 text-white p-2 text-base w-full"}>
+                  onClick={handleCheckout}
+                  className={"shadow-lg rounded-md bg-indigo-500 text-white p-2 text-base w-full" +
+                     " disabled:bg-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed"}>
                   Valider le paiement
                </motion.button>
             </div>

@@ -1,16 +1,17 @@
 import React from 'react'
 import {BuildingStorefrontIcon, ShoppingCartIcon} from "@heroicons/react/24/outline";
-import {CartItemModel} from "../models";
 import {Link} from "react-router-dom";
+import {useAppSelector} from "../app/hooks";
 
 interface NavBarProp {
    value: string
    onQueryChange: any
-   cart: CartItemModel[]
 }
 
 export const NavBar = (props: NavBarProp) => {
-   const {value, onQueryChange, cart} = props
+   const {value, onQueryChange} = props
+   
+   const cart = useAppSelector((state) => state.cartReducer.cart)
    
    const handleChange = React.useCallback((e: any) => {
       onQueryChange(e.target.value)

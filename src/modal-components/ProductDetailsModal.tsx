@@ -5,17 +5,20 @@ import {ProductService} from "../services";
 import {FolderPlusIcon, XMarkIcon} from "@heroicons/react/24/outline";
 import {motion} from "framer-motion";
 import {CounterInput} from "../components";
+import {useAppDispatch} from "../app/hooks";
+import {addToCart} from "../features/cart.slice";
 
 interface ProductDetailsModalProps {
-   addToCart: any
 }
 
 export const ProductDetailsModal = React.forwardRef(
-   (props: ProductDetailsModalProps, ref: ForwardedRef<any>) => {
-      const {addToCart} = props
+   (_props: ProductDetailsModalProps, ref: ForwardedRef<any>) => {
+      
+      const dispatch = useAppDispatch()
+      const productService = new ProductService()
       
       let [isOpen, setIsOpen] = useState<boolean>(false)
-      let [product, setProduct] = useState<ProductModel | null>(null)
+      let [product, setProduct] = useState<ProductModel>(productService.products[0])
       let [quantity, setQuantity] = useState<number>(1)
       
       function closeModal() {
@@ -29,17 +32,12 @@ export const ProductDetailsModal = React.forwardRef(
       }
       
       function handleAddToCart() {
-         addToCart({
+         dispatch(addToCart({
             product,
             quantity
-         })
+         }))
          closeModal()
       }
-      
-      React.useEffect(() => {
-         const productService = new ProductService()
-         setProduct(productService.getProduct('banane'))
-      }, [])
       
       React.useImperativeHandle(ref, () => ({
          open: openModal,

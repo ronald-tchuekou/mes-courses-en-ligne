@@ -7,14 +7,15 @@ import {EmptyContent} from "./EmptyContent";
 import {motion} from "framer-motion";
 import {ProductDetailsModal} from "../modal-components";
 import {useParams} from "react-router-dom";
+import {useAppDispatch} from "../app/hooks";
+import {addToCart} from "../features/cart.slice";
 
 interface ProductGridProps {
    filterQuery: string
-   addToCart: any
 }
 
 export const ProductGrid = (props: ProductGridProps) => {
-   const {filterQuery, addToCart} = props
+   const {filterQuery} = props
    
    const params = useParams()
    
@@ -66,15 +67,12 @@ export const ProductGrid = (props: ProductGridProps) => {
          <div className={"p-5 grid gap-3 sm:gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"}>
             {getContent().map(item => (
                <ProductGridItem
-                  addToCart={addToCart}
                   key={item.id}
                   onProductClick={showProductDetails}
                   item={item}/>
             ))}
          </div>
-         <ProductDetailsModal
-            addToCart={addToCart}
-            ref={productDetailsModalRef}/>
+         <ProductDetailsModal ref={productDetailsModalRef}/>
       </>
    )
 }
@@ -82,18 +80,19 @@ export const ProductGrid = (props: ProductGridProps) => {
 interface ProductGridItemProps {
    item: ProductModel,
    onProductClick: any
-   addToCart: any
 }
 
 const ProductGridItem = (props: ProductGridItemProps) => {
-   const {item, onProductClick, addToCart} = props
+   const {item, onProductClick} = props
+   
+   const dispatch = useAppDispatch()
    
    const handleAddToCart = React.useCallback(() => {
-      addToCart({
+      dispatch(addToCart({
          product: item,
          quantity: 1
-      })
-   }, [addToCart, item])
+      }))
+   }, [dispatch, item])
    
    const handleProductClick = React.useCallback(() => {
       onProductClick(item)
