@@ -23,14 +23,14 @@ export const NavBar = (props: NavBarProp) => {
             to={"/"}
             className={"text-yellow-400 text-xl sm:text-2xl font-bold flex items-center gap-1"}>
             <BuildingStorefrontIcon className={"w-10 h-10"}/>
-            <span className={"inline"}>Mes courses</span>
+            <span className={"hidden sm:inline"}>Mes courses</span>
          </Link>
          <div className={"flex flex-row gap-3 items-center"}>
             <input
                value={value}
                onChange={handleChange}
                placeholder={"Search..."}
-               className={"text-base text-gray-500 px-3 py-2 rounded w-[250px]"}/>
+               className={"text-base text-gray-500 px-3 py-2 rounded w-full sm:w-[250px]"}/>
             <Link
                to={"/cart"}
                className={"relative text-gray-300 hover:text-100"}>

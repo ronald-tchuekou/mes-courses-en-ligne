@@ -60,7 +60,7 @@ export const ProductDetailsModal = React.forwardRef(
                </Transition.Child>
                {/* Modal container */}
                <div className="fixed inset-0 overflow-y-auto">
-                  <div className="flex min-h-full items-center justify-center p-10 text-center">
+                  <div className="flex min-h-full items-center justify-center py-10 px-5 sm:px-10 text-center">
                      <Transition.Child
                         as={Fragment}
                         enter="ease-out duration-300"
@@ -112,7 +112,7 @@ export const ProductDetailsModal = React.forwardRef(
                                        className={"flex-none flex flex-row shadow-lg rounded-md bg-indigo-500/30" +
                                           " text-indigo-500 p-2 items-center text-base gap-3"}>
                                        <FolderPlusIcon className={"h-6 w-6"}/>
-                                       <span className={"block"}>Ajouter au panier</span>
+                                       <span className={"hidden sm:block"}>Ajouter au panier</span>
                                     </motion.button>
                                  </div>
                               </div>
